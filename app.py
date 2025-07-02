@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request
 import pickle
 import numpy as np
+import os
 
 app = Flask(__name__)
 
@@ -8,7 +9,7 @@ app = Flask(__name__)
 with open('model.pkl', 'rb') as f:
     model = pickle.load(f)
 
-# Formula-based EMI
+# Traditional EMI calculation
 def calculate_emi(principal, annual_rate, years):
     monthly_rate = annual_rate / (12 * 100)
     months = years * 12
@@ -25,9 +26,13 @@ def index():
             rate = float(request.form['rate'])
             tenure = float(request.form['tenure'])
 
+            # Traditional formula
             emi = calculate_emi(principal, rate, tenure)
+
+            # ML prediction
             features = np.array([[principal, rate, tenure]])
             ml_emi = round(model.predict(features)[0], 2)
+
         except ValueError:
             emi = "Invalid input"
             ml_emi = None
@@ -35,4 +40,6 @@ def index():
     return render_template('index.html', emi=emi, ml_emi=ml_emi)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Bind to PORT provided by Render/Heroku
+    port = int(os.environ.get('PORT', 5000))
+    app.run(debug=False, host='0.0.0.0', port=port)
