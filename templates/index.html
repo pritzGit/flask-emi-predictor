@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Loan EMI Calculator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="form-container">
+        <h2>📊 Loan EMI Calculator</h2>
+        <form method="POST" class="loan-form" oninput="updateEMI()">
+            <div class="form-group">
+                <label for="principal">Loan Amount (₹):</label>
+                <input type="number" name="principal" id="principal" placeholder="e.g., 500000" required>
+            </div>
+            <div class="form-group">
+                <label for="rate">Annual Interest Rate (%):</label>
+                <input type="number" step="0.01" name="rate" id="rate" placeholder="e.g., 8.5" required>
+            </div>
+            <div class="form-group">
+                <label for="tenure">Tenure (Years):</label>
+                <input type="number" name="tenure" id="tenure" placeholder="e.g., 5" required>
+            </div>
+            <div class="interactive-output">
+                <p><strong>📌 Real-Time EMI:</strong> ₹<span id="liveEmi">0.00</span></p>
+            </div>
+            <button type="submit">Get ML Predicted EMI</button>
+        </form>
+        {% if emi is not none %}
+        <div class="emi-output">
+            <p><strong>📐 Traditional EMI:</strong> ₹{{ emi }}</p>
+            <p><strong>🤖 ML Predicted EMI:</strong> ₹{{ ml_emi }}</p>
+        </div>
+        {% endif %}
+    </div>
+    <script>
+        function updateEMI() {
+            let P = parseFloat(document.getElementById('principal').value) || 0;
+            let R = parseFloat(document.getElementById('rate').value) || 0;
+            let N = parseFloat(document.getElementById('tenure').value) || 0;
+            let r = R / (12 * 100);
+            let n = N * 12;
+            let emi = 0;
+            if (P > 0 && R > 0 && N > 0) {
+                emi = (P * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+            }
+            document.getElementById('liveEmi').innerText = emi.toFixed(2);
+        }
+    </script>
+</body>
+</html>
